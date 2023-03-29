@@ -17,6 +17,8 @@ const App = () => {
     const mr = useRef(null);
     const [audContext, setAudContext] = useState();
 
+    const [room_joined, set_room_joined] = useState(false);
+
     const [roomName, _setRoomName] = useState(new Date().getTime() + "");
 
     const aud = useRef(null);
@@ -181,20 +183,39 @@ const App = () => {
     return (
         <>
 
-            <button onClick={() => {
-                socket.emit("start_call", { roomName });
-                startr();
-            }}>
-                Start Record
-            </button>
+            {
+                room_joined ?
 
-            <button onClick={() => {
-                startr(true);
-            }}>
-                Stop Record
-            </button>
+                    <>
+                        <button onClick={() => {
+                            // socket.emit("start_call", { roomName });
+                            startr();
+                        }}>
+                            Start Record
+                        </button>
 
-            <audio ref={aud} id="audio" controls />
+                        <button onClick={() => {
+                            startr(true);
+                        }}>
+                            Stop Record
+                        </button>
+
+                        <audio ref={aud} id="audio" controls />
+                    </>
+
+                    :
+
+                    <>
+
+                        <button
+                            onClick={() => {
+                                socket.emit("start_call", { roomName });
+                                set_room_joined(true);
+                            }}
+                        >Call To Agent</button>
+                    </>
+            }
+
 
         </>
     );
@@ -246,6 +267,37 @@ export default App;
 //         );
 
 
+// }
+
+// export default App;
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+// New Audio streaming data
+// import React, { useEffect } from "react";
+
+// const App = () => {
+
+//     useEffect(() => {
+
+//         navigator.mediaDevices.getUserMedia({audio: true}).then((stream) => {
+//             console.log("Stream: ", stream);
+
+//         })
+
+//     }, []);
+
+//     return (
+//         <>
+
+
+
+//         </>
+//     );
 // }
 
 // export default App;
