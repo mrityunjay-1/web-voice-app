@@ -1,0 +1,137 @@
+// navigator.mediaDevices.getUserMedia({ audio: true })
+                    //     .then((stream) => {
+
+                    //         console.log(stream);
+
+                    //         // document.getElementById("audio").srcObject = stream;
+
+                    //         const mediaRecorder = new MediaRecorder(stream);
+
+                    //         // mr.current = mediaReorder;
+
+                    //         mediaRecorder.start();
+
+                    //         setTimeout(() => {
+                    //             mediaRecorder.stop();
+                    //             console.log("set time out called...");
+                    //             mediaRecorder.ondataavailable = async (event) => {
+
+                    //                 let a = new Blob([event.data], { type: "audio/wav" });
+                    //                 aud.current.src = URL.createObjectURL(a);
+
+                    //                 let str = await blobToArrayBuffer(a);
+
+                    //                 console.log("blob.text : ", str);
+
+                    //                 axios({
+                    //                     method: "POST",
+                    //                     url: "http://127.0.0.1:8080/audio/record",
+                    //                     data: {
+                    //                         stream: str
+                    //                     }
+                    //                 }).then((res) => {
+                    //                     console.log("Response: ", res);
+
+                    //                 }).catch((err) => {
+                    //                     console.log("Err: ", err);
+                    //                 })
+                    //                 mediaRecorder.start();
+
+                    //             }
+                    //         }, 2000);
+
+                    //     })
+                    //     .catch((err) => {
+                    //         console.log("error while gettting user media", err);
+                    //     });
+
+
+
+
+// import { useState, useRef } from 'react';
+// const App = () => {
+
+//         const [recording, setRecording] = useState(false);
+//         const [audioSrc, setAudioSrc] = useState(null);
+//         const mediaRecorderRef = useRef(null);
+//         const audioRef = useRef(null);
+
+//         const handleStartRecording = () => {
+//             navigator.mediaDevices.getUserMedia({ audio: true })
+//                 .then(stream => {
+//                     const mediaRecorder = new MediaRecorder(stream);
+//                     mediaRecorderRef.current = mediaRecorder;
+//                     mediaRecorder.start();
+//                     setRecording(true);
+//                 })
+//                 .catch(error => {
+//                     console.error(error);
+//                 });
+//         };
+
+//         const handleStopRecording = () => {
+//             mediaRecorderRef.current.stop();
+//             setRecording(false);
+//             mediaRecorderRef.current.ondataavailable = (event) => {
+//                 const audioBlob = new Blob([event.data], { type: 'audio/wav' });
+//                 const audioUrl = URL.createObjectURL(audioBlob);
+//                 setAudioSrc(audioUrl);
+//             };
+//         };
+
+//         return (
+//             <div>
+//                 {recording ?
+//                     <button onClick={handleStopRecording}>Stop Recording</button> :
+//                     <button onClick={handleStartRecording}>Start Recording</button>
+//                 }
+//                 {audioSrc &&
+//                     <audio ref={audioRef} controls src={audioSrc} />
+//                 }
+//             </div>
+//         );
+
+
+// }
+
+// export default App;
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+// New Audio streaming data
+// import React, { useEffect } from "react";
+
+// const App = () => {
+
+//     useEffect(() => {
+
+//         navigator.mediaDevices.getUserMedia({audio: true}).then((stream) => {
+//             console.log("Stream: ", stream);
+
+//         })
+
+//     }, []);
+
+//     return (
+//         <>
+
+
+
+//         </>
+//     );
+// }
+
+// export default App;
+
+
+const arrayBufferToString = (arrayBuffer) => new Promise((resolve, reject) => {
+    const arr = new Uint16Array(arrayBuffer);
+    const str = String.fromCharCode(...arr);
+    // console.log("Base 64 string : ", str);
+
+    return btoa(str);
+});

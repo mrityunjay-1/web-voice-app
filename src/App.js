@@ -1,27 +1,24 @@
 import React, { useEffect, useRef, useState } from "react";
 import axios from "axios";
 import Recorder from "recorder-js";
+import arr from "./int";
 
 import socketIOClient from "socket.io-client";
+import speak from "./helpers/speechSynthesis";
 
 const socket = socketIOClient("http://localhost:8080");
 
-socket.on("greeting", (data) => {
-    console.log("Data: ", data);
-});
-
 const App = () => {
 
-    const [m, setM] = useState();
-    const [chunks, setChunks] = useState([]);
-    const mr = useRef(null);
     const [audContext, setAudContext] = useState();
-
     const [room_joined, set_room_joined] = useState(false);
-
     const [roomName, _setRoomName] = useState(new Date().getTime() + "");
-
     const aud = useRef(null);
+    const rec = useRef(null);
+
+    const [userSocketId, setUserSocketId] = useState(socket.id);
+
+    const timeoutRef = useRef();
 
     const blobToArrayBuffer = (blob) => new Promise((resolve, reject) => {
         const fr = new FileReader();
@@ -31,22 +28,12 @@ const App = () => {
         }
     });
 
-    const arrayBufferToString = (arrayBuffer) => new Promise((resolve, reject) => {
-        const arr = new Uint16Array(arrayBuffer);
-        const str = String.fromCharCode(...arr);
-        // console.log("Base 64 string : ", str);
-
-        return btoa(str);
-    });
-
-    const rec = useRef(null);
-
     let ct;
 
     const startr = (stop = false) => {
 
         if (stop) {
-            clearTimeout(ct);
+            clearTimeout(timeoutRef.current);
             stopr(true);
             return;
         }
@@ -55,39 +42,35 @@ const App = () => {
             audContext.resume();
         }
         rec.current.start();
-        // _setRoomName();
 
-        ct = setTimeout(() => {
+        timeoutRef.current = setTimeout(() => {
             stopr(stop);
         }, 1000);
     }
 
     const stopr = (reallyStop = false) => {
 
-        console.log("Stopr fn called...");
+        // console.log("Stopr fn called...");
 
         rec.current.stop().then(async ({ blob, buffer }) => {
 
             let a = new Blob([blob], { type: "audio/wav" });
-            aud.current.src = URL.createObjectURL(a);
-            aud.current.play();
+            // aud.current.src = URL.createObjectURL(a);
+            // aud.current.play();
 
             // getting pcm data
             const pcmData = await blobToArrayBuffer(blob);
 
-            // console.log("PCM Data: ", JSON.stringify(Object.values(pcmData)));
-
-            // axios({url: "http://localhost:8080/audio/record", method: "POST", data: {arr : JSON.stringify(Object.values(pcmData))}}).then((res) => {
-            //     console.log(res);
-            // });
 
             if (reallyStop) {
                 // disconnect user so that they can not send any data to backend
                 socket.emit("disconnect_call", { roomName });
-                clearTimeout(ct);
+                clearTimeout(timeoutRef.current);
             } else {
                 startr();
             }
+
+            console.log("pcm Data : ", pcmData);
 
             socket.emit("recording", {
                 roomName,
@@ -104,55 +87,7 @@ const App = () => {
             async () => {
                 try {
 
-                    // navigator.mediaDevices.getUserMedia({ audio: true })
-                    //     .then((stream) => {
-
-                    //         console.log(stream);
-
-                    //         // document.getElementById("audio").srcObject = stream;
-
-                    //         const mediaRecorder = new MediaRecorder(stream);
-
-                    //         // mr.current = mediaReorder;
-
-                    //         mediaRecorder.start();
-
-                    //         setTimeout(() => {
-                    //             mediaRecorder.stop();
-                    //             console.log("set time out called...");
-                    //             mediaRecorder.ondataavailable = async (event) => {
-
-                    //                 let a = new Blob([event.data], { type: "audio/wav" });
-                    //                 aud.current.src = URL.createObjectURL(a);
-
-                    //                 let str = await blobToArrayBuffer(a);
-
-                    //                 console.log("blob.text : ", str);
-
-                    //                 axios({
-                    //                     method: "POST",
-                    //                     url: "http://127.0.0.1:8080/audio/record",
-                    //                     data: {
-                    //                         stream: str
-                    //                     }
-                    //                 }).then((res) => {
-                    //                     console.log("Response: ", res);
-
-                    //                 }).catch((err) => {
-                    //                     console.log("Err: ", err);
-                    //                 })
-                    //                 mediaRecorder.start();
-
-                    //             }
-                    //         }, 2000);
-
-                    //     })
-                    //     .catch((err) => {
-                    //         console.log("error while gettting user media", err);
-                    //     });
-
                     const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-
                     setAudContext(audioContext);
 
                     const recorder = new Recorder(audioContext, {
@@ -174,46 +109,135 @@ const App = () => {
             }
         )();
 
-        socket.on("vb-response", (data) => {
-            console.log("Yay! Data: ", data);
-        })
+        socket.on("greeting", (data) => {
+            // console.log("greeting message: ", data.message);
+            console.log("socketId: ", data.socketId);
+            if (data.socketId) {
+                setUserSocketId(data.socketId);
+            }
+        });
 
-    }, [])
+        socket.on("vb-response", (data) => {
+            // console.log("Yay! Data: ", data);
+            speak({ text: data.response, volume: data.volume, rate: data.rate, pitch: data.pitch, lang: data.lang });
+        });
+
+    }, []);
+
+    // useEffect(() => {
+    //     // function getVoices() {
+    //     //     let voices = speechSynthesis.getVoices();
+    //     //     if (!voices.length) {
+    //     //         // some time the voice will not be initialized so we can call spaek with empty string
+    //     //         // this will initialize the voices 
+    //     //         let utterance = new SpeechSynthesisUtterance("");
+    //     //         speechSynthesis.speak(utterance);
+    //     //         voices = speechSynthesis.getVoices();
+    //     //     }
+    //     //     return voices;
+    //     // }
+
+    //     // function speak(text, voice, rate, pitch, volume) {
+    //     //     // create a SpeechSynthesisUtterance to configure the how text to be spoken 
+    //     //     let speakData = new SpeechSynthesisUtterance();
+    //     //     speakData.volume = volume; // From 0 to 1
+    //     //     speakData.rate = rate; // From 0.1 to 10
+    //     //     speakData.pitch = pitch; // From 0 to 2
+    //     //     speakData.text = text;
+    //     //     speakData.lang = 'en';
+    //     //     speakData.voice = voice;
+
+    //     //     // pass the SpeechSynthesisUtterance to speechSynthesis.speak to start speaking 
+    //     //     speechSynthesis.speak(speakData);
+    //     //     // speechSynthesis.p
+
+    //     // }
+
+    //     // if ('speechSynthesis' in window) {
+
+    //     //     let voices = getVoices();
+    //     //     let rate = 1, pitch = 1, volume = 1;
+    //     //     let text = "Spaecking with volume = 1 rate =1 pitch =2 ";
+
+    //     //     // speak(text, voices[5], rate, pitch, volume);
+
+    //     //     setTimeout(() => { // speak after 2 seconds 
+    //     //         rate = 0.8; pitch = 1.5; volume = 0.5;
+    //     //         text = "website, also called Web site, collection of files and related resources accessible through the World Wide Web and organized under a particular domain name. Typical files found at a website are HTML documents with their associated graphic image files (GIF, JPEG, etc.), scripted programs (in Perl, PHP, Java, etc.), and similar resources. The site's files.";
+    //     //         speak(text, voices[5], rate, pitch, volume);
+    //     //     }, 200);
+
+    //     // } else {
+    //     //     console.log(' Speech Synthesis Not Supported 😞');
+    //     // }
+
+    //     // let int16Array = new Int16Array(arr);
+
+    //     // console.log("arr buffer : ", int16Array);
+
+    //     // let arrBlob = new Blob([int16Array], { type: "audio/wav" });
+
+    //     // console.log("arr blob = ", arrBlob);
+
+    //     // aud.current.src = URL.createObjectURL(arrBlob);
+    //     // aud.current.play();
+
+    // }, []);
 
     return (
         <>
+
+            {/* <audio ref={aud} id="audio" controls /> */}
 
             {
                 room_joined ?
 
                     <>
-                        <button onClick={() => {
+                        {/* <button onClick={() => {
                             // socket.emit("start_call", { roomName });
                             startr();
                         }}>
                             Start Record
-                        </button>
+                        </button> */}
 
-                        <button onClick={() => {
-                            startr(true);
-                        }}>
-                            Stop Record
-                        </button>
+                        <div style={{ width: "100vw", height: "100vh", backgroundColor: "lightgreen", display: "grid", placeItems: "center" }}>
 
-                        <audio ref={aud} id="audio" controls />
+                            {
+                                userSocketId ?
+                                    <p>Your Socket id is : {userSocketId}</p>
+                                    :
+                                    null
+                            }
+
+                            <button
+                                style={{ fontSize: "2rem", padding: "2rem 4rem", backgroundColor: "indigo", color: "white", border: "0.1rem solid black", borderRadius: "1rem" }}
+                                onClick={() => {
+                                    startr(true);
+                                    set_room_joined(false);
+                                }}
+                            >
+                                📞  &nbsp; Cut this call
+                            </button>
+
+                        </div>
+
+                        {/* <audio ref={aud} id="audio" controls /> */}
                     </>
 
                     :
 
-                    <>
-
+                    <div style={{ width: "100vw", height: "100vh", backgroundColor: "cyan", display: "grid", placeItems: "center" }}>
                         <button
+                            style={{ fontSize: "2rem", padding: "2rem 4rem", backgroundColor: "indigo", color: "white", border: "0.1rem solid black", borderRadius: "1rem" }}
                             onClick={() => {
-                                socket.emit("start_call", { roomName });
+                                socket.emit("join_room", { roomName });
                                 set_room_joined(true);
+                                startr();
                             }}
-                        >Call To Agent</button>
-                    </>
+                        >
+                            📞  &nbsp; Call To IVR
+                        </button>
+                    </div>
             }
 
 
@@ -222,82 +246,3 @@ const App = () => {
 }
 
 export default App;
-
-// import { useState, useRef } from 'react';
-// const App = () => {
-
-//         const [recording, setRecording] = useState(false);
-//         const [audioSrc, setAudioSrc] = useState(null);
-//         const mediaRecorderRef = useRef(null);
-//         const audioRef = useRef(null);
-
-//         const handleStartRecording = () => {
-//             navigator.mediaDevices.getUserMedia({ audio: true })
-//                 .then(stream => {
-//                     const mediaRecorder = new MediaRecorder(stream);
-//                     mediaRecorderRef.current = mediaRecorder;
-//                     mediaRecorder.start();
-//                     setRecording(true);
-//                 })
-//                 .catch(error => {
-//                     console.error(error);
-//                 });
-//         };
-
-//         const handleStopRecording = () => {
-//             mediaRecorderRef.current.stop();
-//             setRecording(false);
-//             mediaRecorderRef.current.ondataavailable = (event) => {
-//                 const audioBlob = new Blob([event.data], { type: 'audio/wav' });
-//                 const audioUrl = URL.createObjectURL(audioBlob);
-//                 setAudioSrc(audioUrl);
-//             };
-//         };
-
-//         return (
-//             <div>
-//                 {recording ?
-//                     <button onClick={handleStopRecording}>Stop Recording</button> :
-//                     <button onClick={handleStartRecording}>Start Recording</button>
-//                 }
-//                 {audioSrc &&
-//                     <audio ref={audioRef} controls src={audioSrc} />
-//                 }
-//             </div>
-//         );
-
-
-// }
-
-// export default App;
-
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-// New Audio streaming data
-// import React, { useEffect } from "react";
-
-// const App = () => {
-
-//     useEffect(() => {
-
-//         navigator.mediaDevices.getUserMedia({audio: true}).then((stream) => {
-//             console.log("Stream: ", stream);
-
-//         })
-
-//     }, []);
-
-//     return (
-//         <>
-
-
-
-//         </>
-//     );
-// }
-
-// export default App;

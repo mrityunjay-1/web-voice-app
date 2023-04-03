@@ -1,5 +1,6 @@
 import React from "react";
 import App from "./App";
+import "./css/index.css";
 
 // import ReactMediaRecorder from "./rmr";
 
