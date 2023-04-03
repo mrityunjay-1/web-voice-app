@@ -10,7 +10,7 @@ let socketUrl;
 if (process.env.NODE_ENV === "production") {
     socketUrl = "https://vb-backend-g617.onrender.com";
 } else {
-    socketUrl = "http://localhost:8080";
+    socketUrl = "http://localhost:9000";
 }
 
 const socket = socketIOClient(socketUrl);
@@ -305,7 +305,7 @@ const App = () => {
                                 onClick={() => {
 
                                     if (!(name && phone && email)) {
-                                        alert("Please fill al the details to start the call...");
+                                        alert("Please fill all the details to start the call...");
                                         return null;
                                     }
 
