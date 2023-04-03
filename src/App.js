@@ -4,7 +4,14 @@ import Recorder from "recorder-js";
 import socketIOClient from "socket.io-client";
 import speak from "./helpers/speechSynthesis";
 
-const socket = socketIOClient("http://localhost:8080");
+let socketUrl;
+if (process.env.NODE_ENV === "production") {
+    socketUrl = "https://vb-backend-g617.onrender.com";
+} else {
+    socketUrl = "http://localhost:8080";
+}
+
+const socket = socketIOClient(socketUrl);
 
 const App = () => {
 
