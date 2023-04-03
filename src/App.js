@@ -1,7 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import axios from "axios";
 import Recorder from "recorder-js";
-import arr from "./int";
 
 import socketIOClient from "socket.io-client";
 import speak from "./helpers/speechSynthesis";
@@ -11,9 +9,9 @@ const socket = socketIOClient("http://localhost:8080");
 const App = () => {
 
     const [audContext, setAudContext] = useState();
-    const [room_joined, set_room_joined] = useState(false);
-    const [roomName, _setRoomName] = useState(new Date().getTime() + "");
-    const aud = useRef(null);
+    const [room_joined, set_room_joined] = useState(false); // eslint-disable-next-line
+    const [roomName, _setRoomName] = useState(new Date().getTime() + ""); // eslint-disable-next-line
+    // const aud = useRef(null); // eslint-disable-next-line
     const rec = useRef(null);
 
     const [userSocketId, setUserSocketId] = useState(socket.id);
@@ -28,7 +26,7 @@ const App = () => {
         }
     });
 
-    let ct;
+    // let ct;
 
     const startr = (stop = false) => {
 
@@ -54,7 +52,7 @@ const App = () => {
 
         rec.current.stop().then(async ({ blob, buffer }) => {
 
-            let a = new Blob([blob], { type: "audio/wav" });
+            // let a = new Blob([blob], { type: "audio/wav" });
             // aud.current.src = URL.createObjectURL(a);
             // aud.current.play();
 
