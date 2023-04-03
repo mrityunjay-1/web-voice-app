@@ -2,9 +2,10 @@ import React, { useEffect, useRef, useState } from "react";
 import Recorder from "recorder-js";
 
 import micIcon from "./assets/images/mic.gif";
+import micInitial from "./assets/images/mic-initial.png";
 
 import socketIOClient from "socket.io-client";
-import speak from "./helpers/speechSynthesis";
+// import speak from "./helpers/speechSynthesis";
 
 let socketUrl;
 if (process.env.NODE_ENV === "production") {
@@ -22,6 +23,8 @@ const App = () => {
     const [roomName, _setRoomName] = useState(new Date().getTime() + ""); // eslint-disable-next-line
     // const aud = useRef(null); // eslint-disable-next-line
     const rec = useRef(null);
+
+    const [imgSrc, setImgSrc] = useState(true);
 
     const [userSocketId, setUserSocketId] = useState(socket.id);
 
@@ -51,7 +54,7 @@ const App = () => {
             return;
         }
 
-        if (audContext.state === "suspended") {
+        if (audContext?.state === "suspended") {
             audContext.resume();
         }
         rec.current.start();
@@ -132,10 +135,26 @@ const App = () => {
 
         socket.on("vb-response", (data) => {
             // console.log("Yay! Data: ", data);
-            speak({ text: data.response, volume: data.volume, rate: data.rate, pitch: data.pitch, lang: data.lang });
-        });
+            // speak({ text: data.response, volume: data.volume, rate: data.rate, pitch: data.pitch, lang: data.lang });
 
-    }, []);
+            let audioRef = new Audio(data.audio_file_url);
+            audioRef.play();
+
+            startr(true);
+
+            setImgSrc(false);
+
+            audioRef.onended = () => {
+                console.log("khatam ho gayi audio file ki play time...");
+                startr();
+                setImgSrc(true);
+            }
+
+            // disabling 
+
+        });
+        // eslint-disable-next-line
+    }, []); // eslint-disable-next-line
 
     useEffect(() => {
         // function getVoices() {
@@ -243,17 +262,29 @@ const App = () => {
                             {
                                 userSocketId ?
                                     <>
-                                        <p>Your socket id is : {userSocketId}</p>
 
-                                        <div style={{ width: "40%", display: "flex", justifyContent: "center", flexDirection: "column", alignItems: "center" }}>
-                                            <img src={micIcon} style={{ width: "50%" }} alt="mic-icon" />
-                                            <br />
-                                            <br />
-                                            <h2 style={{ textAlign: "center" }}>Keep saying and wait for responses as you want, like a phone call...</h2>
-                                            <br />
-                                            <br />
-                                            <h1 id="dotter" style={{ textAlign: "center" }}>I am listening</h1>
-                                        </div>
+                                        {
+                                            imgSrc
+                                                ?
+                                                <>
+                                                    <p>Your socket id is : {userSocketId}</p>
+
+                                                    <div style={{ width: "40%", display: "flex", justifyContent: "center", flexDirection: "column", alignItems: "center" }}>
+                                                        <img src={micIcon} style={{ width: "50%" }} alt="mic-icon" />
+                                                        <br />
+                                                        <br />
+                                                        <h2 style={{ textAlign: "center" }}>Keep saying and wait for responses as you want, like a phone call...</h2>
+                                                        <br />
+                                                        <br />
+                                                        <h1 id="dotter" style={{ textAlign: "center" }}>I am listening</h1>
+                                                    </div>
+                                                </>
+                                                :
+                                                <div style={{ width: "40%", display: "flex", justifyContent: "center", flexDirection: "column", alignItems: "center" }}>
+                                                    <img src={micInitial} style={{ width: "50%" }} alt="mic-initial-icon" />
+                                                </div>
+
+                                        }
 
                                     </>
                                     :
