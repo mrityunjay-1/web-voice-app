@@ -1,6 +1,8 @@
 import React, { useEffect, useRef, useState } from "react";
 import Recorder from "recorder-js";
 
+import micIcon from "./assets/images/mic.gif";
+
 import socketIOClient from "socket.io-client";
 import speak from "./helpers/speechSynthesis";
 
@@ -24,6 +26,7 @@ const App = () => {
     const [userSocketId, setUserSocketId] = useState(socket.id);
 
     const timeoutRef = useRef();
+    const dotterRef = useRef();
 
     const blobToArrayBuffer = (blob) => new Promise((resolve, reject) => {
         const fr = new FileReader();
@@ -129,65 +132,90 @@ const App = () => {
 
     }, []);
 
-    // useEffect(() => {
-    //     // function getVoices() {
-    //     //     let voices = speechSynthesis.getVoices();
-    //     //     if (!voices.length) {
-    //     //         // some time the voice will not be initialized so we can call spaek with empty string
-    //     //         // this will initialize the voices 
-    //     //         let utterance = new SpeechSynthesisUtterance("");
-    //     //         speechSynthesis.speak(utterance);
-    //     //         voices = speechSynthesis.getVoices();
-    //     //     }
-    //     //     return voices;
-    //     // }
+    useEffect(() => {
+        // function getVoices() {
+        //     let voices = speechSynthesis.getVoices();
+        //     if (!voices.length) {
+        //         // some time the voice will not be initialized so we can call spaek with empty string
+        //         // this will initialize the voices 
+        //         let utterance = new SpeechSynthesisUtterance("");
+        //         speechSynthesis.speak(utterance);
+        //         voices = speechSynthesis.getVoices();
+        //     }
+        //     return voices;
+        // }
 
-    //     // function speak(text, voice, rate, pitch, volume) {
-    //     //     // create a SpeechSynthesisUtterance to configure the how text to be spoken 
-    //     //     let speakData = new SpeechSynthesisUtterance();
-    //     //     speakData.volume = volume; // From 0 to 1
-    //     //     speakData.rate = rate; // From 0.1 to 10
-    //     //     speakData.pitch = pitch; // From 0 to 2
-    //     //     speakData.text = text;
-    //     //     speakData.lang = 'en';
-    //     //     speakData.voice = voice;
+        // function speak(text, voice, rate, pitch, volume) {
+        //     // create a SpeechSynthesisUtterance to configure the how text to be spoken 
+        //     let speakData = new SpeechSynthesisUtterance();
+        //     speakData.volume = volume; // From 0 to 1
+        //     speakData.rate = rate; // From 0.1 to 10
+        //     speakData.pitch = pitch; // From 0 to 2
+        //     speakData.text = text;
+        //     speakData.lang = 'en';
+        //     speakData.voice = voice;
 
-    //     //     // pass the SpeechSynthesisUtterance to speechSynthesis.speak to start speaking 
-    //     //     speechSynthesis.speak(speakData);
-    //     //     // speechSynthesis.p
+        //     // pass the SpeechSynthesisUtterance to speechSynthesis.speak to start speaking 
+        //     speechSynthesis.speak(speakData);
+        //     // speechSynthesis.p
 
-    //     // }
+        // }
 
-    //     // if ('speechSynthesis' in window) {
+        // if ('speechSynthesis' in window) {
 
-    //     //     let voices = getVoices();
-    //     //     let rate = 1, pitch = 1, volume = 1;
-    //     //     let text = "Spaecking with volume = 1 rate =1 pitch =2 ";
+        //     let voices = getVoices();
+        //     let rate = 1, pitch = 1, volume = 1;
+        //     let text = "Spaecking with volume = 1 rate =1 pitch =2 ";
 
-    //     //     // speak(text, voices[5], rate, pitch, volume);
+        //     // speak(text, voices[5], rate, pitch, volume);
 
-    //     //     setTimeout(() => { // speak after 2 seconds 
-    //     //         rate = 0.8; pitch = 1.5; volume = 0.5;
-    //     //         text = "website, also called Web site, collection of files and related resources accessible through the World Wide Web and organized under a particular domain name. Typical files found at a website are HTML documents with their associated graphic image files (GIF, JPEG, etc.), scripted programs (in Perl, PHP, Java, etc.), and similar resources. The site's files.";
-    //     //         speak(text, voices[5], rate, pitch, volume);
-    //     //     }, 200);
+        //     setTimeout(() => { // speak after 2 seconds 
+        //         rate = 0.8; pitch = 1.5; volume = 0.5;
+        //         text = "website, also called Web site, collection of files and related resources accessible through the World Wide Web and organized under a particular domain name. Typical files found at a website are HTML documents with their associated graphic image files (GIF, JPEG, etc.), scripted programs (in Perl, PHP, Java, etc.), and similar resources. The site's files.";
+        //         speak(text, voices[5], rate, pitch, volume);
+        //     }, 200);
 
-    //     // } else {
-    //     //     console.log(' Speech Synthesis Not Supported 😞');
-    //     // }
+        // } else {
+        //     console.log(' Speech Synthesis Not Supported 😞');
+        // }
 
-    //     // let int16Array = new Int16Array(arr);
+        // let int16Array = new Int16Array(arr);
 
-    //     // console.log("arr buffer : ", int16Array);
+        // console.log("arr buffer : ", int16Array);
 
-    //     // let arrBlob = new Blob([int16Array], { type: "audio/wav" });
+        // let arrBlob = new Blob([int16Array], { type: "audio/wav" });
 
-    //     // console.log("arr blob = ", arrBlob);
+        // console.log("arr blob = ", arrBlob);
 
-    //     // aud.current.src = URL.createObjectURL(arrBlob);
-    //     // aud.current.play();
+        // aud.current.src = URL.createObjectURL(arrBlob);
+        // aud.current.play();
 
-    // }, []);
+        const dotter = document.getElementById("dotter");
+
+        console.log("Dotter : ", dotter);
+
+        if (dotter) {
+            let initialText = dotter.textContent;
+            let i = 0;
+            dotterRef.current = setInterval(() => {
+
+                console.log("i = ", i);
+
+                if (i === 3) {
+                    dotter.textContent = initialText;
+                    i = 0;
+                } else {
+
+                    dotter.textContent = dotter.textContent + ".";
+
+                    i = i + 1;
+                }
+
+
+            }, 1000);
+        }
+
+    }, [room_joined]);
 
     return (
         <>
@@ -209,19 +237,33 @@ const App = () => {
 
                             {
                                 userSocketId ?
-                                    <p>Your Socket id is : {userSocketId}</p>
+                                    <>
+                                        <p>Your socket id is : {userSocketId}</p>
+
+                                        <div style={{ width: "40%", display: "flex", justifyContent: "center", flexDirection: "column", alignItems: "center" }}>
+                                            <img src={micIcon} style={{ width: "50%" }} alt="mic-icon" />
+                                            <br />
+                                            <br />
+                                            <h2 style={{ textAlign: "center" }}>Keep saying and wait for responses as you want, like a phone call...</h2>
+                                            <br />
+                                            <br />
+                                            <h1 id="dotter" style={{ textAlign: "center" }}>I am listening</h1>
+                                        </div>
+
+                                    </>
                                     :
                                     null
                             }
 
                             <button
-                                style={{ fontSize: "2rem", padding: "2rem 4rem", backgroundColor: "indigo", color: "white", border: "0.1rem solid black", borderRadius: "1rem" }}
+                                style={{ cursor: "pointer", fontSize: "2rem", padding: "1rem 4rem", backgroundColor: "indigo", color: "white", border: "0.1rem solid black", borderRadius: "1rem" }}
                                 onClick={() => {
                                     startr(true);
                                     set_room_joined(false);
+                                    clearInterval(dotterRef.current)
                                 }}
                             >
-                                📞  &nbsp; Cut this call
+                                Cut this call &nbsp; ❌
                             </button>
 
                         </div>
@@ -233,7 +275,7 @@ const App = () => {
 
                     <div style={{ width: "100vw", height: "100vh", backgroundColor: "cyan", display: "grid", placeItems: "center" }}>
                         <button
-                            style={{ fontSize: "2rem", padding: "2rem 4rem", backgroundColor: "indigo", color: "white", border: "0.1rem solid black", borderRadius: "1rem" }}
+                            style={{ fontSize: "2rem", padding: "1rem 4rem", backgroundColor: "indigo", color: "white", border: "0.1rem solid black", borderRadius: "1rem" }}
                             onClick={() => {
                                 socket.emit("join_room", { roomName });
                                 set_room_joined(true);
