@@ -28,6 +28,11 @@ const App = () => {
     const timeoutRef = useRef();
     const dotterRef = useRef();
 
+    // user form to start web call
+    const [name, setName] = useState();
+    const [phone, setPhone] = useState();
+    const [email, setEmail] = useState();
+
     const blobToArrayBuffer = (blob) => new Promise((resolve, reject) => {
         const fr = new FileReader();
         fr.readAsArrayBuffer(blob);
@@ -274,16 +279,48 @@ const App = () => {
                     :
 
                     <div style={{ width: "100vw", height: "100vh", backgroundColor: "cyan", display: "grid", placeItems: "center" }}>
-                        <button
-                            style={{ fontSize: "2rem", padding: "1rem 4rem", backgroundColor: "indigo", color: "white", border: "0.1rem solid black", borderRadius: "1rem" }}
-                            onClick={() => {
-                                socket.emit("join_room", { roomName });
-                                set_room_joined(true);
-                                startr();
-                            }}
-                        >
-                            📞  &nbsp; Call To IVR
-                        </button>
+
+                        <div className="form-container">
+
+                            <div className="form-container-div">
+                                <p className="form-p-tag">Name</p>
+                                <input value={name} onChange={(e) => setName(e.target.value)} type="text" id="name" placeholder="Your Name" required />
+                            </div>
+
+                            <div className="form-container-div">
+                                <p className="form-p-tag">Phone No</p>
+                                <input value={phone} onChange={(e) => setPhone(e.target.value)} type="number" id="name" placeholder="Your Phone No. Ex: 12345667890" required />
+                            </div>
+
+                            <div className="form-container-div">
+                                <p className="form-p-tag">Email</p>
+                                <input value={email} onChange={(e) => setEmail(e.target.value)} type="email" id="name" placeholder="Your Email Ex: abcd@example.com" required />
+                            </div>
+
+                            <br />
+                            <br />
+
+                            <button
+                                style={{ width: "100%", fontSize: "2rem", padding: "1rem 4rem", backgroundColor: "indigo", color: "white", border: "0.1rem solid black", borderRadius: "1rem" }}
+                                onClick={() => {
+
+                                    if (!(name && phone && email)) {
+                                        alert("Please fill al the details to start the call...");
+                                        return null;
+                                    }
+
+                                    socket.emit("join_room", { roomName, name, phone, email });
+                                    set_room_joined(true);
+                                    startr();
+                                    setName("");
+                                    setPhone("");
+                                    setEmail("");
+                                }}
+                            >
+                                📞  &nbsp; Call To IVR
+                            </button>
+
+                        </div>
                     </div>
             }
 
