@@ -216,14 +216,14 @@ const App = () => {
 
         const dotter = document.getElementById("dotter");
 
-        console.log("Dotter : ", dotter);
+        // console.log("Dotter : ", dotter);
 
         if (dotter) {
             let initialText = dotter.textContent;
             let i = 0;
             dotterRef.current = setInterval(() => {
 
-                console.log("i = ", i);
+                // console.log("i = ", i);
 
                 if (i === 3) {
                     dotter.textContent = initialText;
@@ -341,11 +341,19 @@ const App = () => {
                                     }
 
                                     socket.emit("join_room", { roomName, name, phone, email });
+
+                                    let audioRef = new Audio("http://localhost:9000/airlines_new_airlines_greeting_msg_tts.mp3");
+                                    
+                                    if (audioRef) {
+                                        audioRef.play();
+                                    }
+
                                     set_room_joined(true);
-                                    startr();
-                                    setName("");
-                                    setPhone("");
-                                    setEmail("");
+
+                                    audioRef.onended = () => {
+                                        startr();
+                                    }
+
                                 }}
                             >
                                 📞  &nbsp; Call To IVR
