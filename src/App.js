@@ -14,7 +14,7 @@ if (process.env.NODE_ENV === "production") {
         socketUrl = "http://192.168.29.80:9000";
     }
     else {
-        socketUrl = "https://vb-backend-g617.onrender.com";
+        socketUrl = "https://6d2a-2405-201-403b-99f8-e876-a1d0-e13b-dd5f.in.ngrok.io/";
     }
 
 } else {
