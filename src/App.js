@@ -9,7 +9,14 @@ import socketIOClient from "socket.io-client";
 
 let socketUrl;
 if (process.env.NODE_ENV === "production") {
-    socketUrl = "https://vb-backend-g617.onrender.com";
+
+    if (window.location.search.includes("office")) {
+        socketUrl = "http://192.168.29.122:9000";
+    }
+    else {
+        socketUrl = "https://vb-backend-g617.onrender.com";
+    }
+
 } else {
     socketUrl = "http://localhost:9000";
 }
@@ -343,7 +350,7 @@ const App = () => {
                                     socket.emit("join_room", { roomName, name, phone, email });
 
                                     let audioRef = new Audio("http://localhost:9000/airlines_new_airlines_greeting_msg_tts.mp3");
-                                    
+
                                     if (audioRef) {
                                         audioRef.play();
                                     }
