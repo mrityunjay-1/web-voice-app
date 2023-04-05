@@ -11,7 +11,7 @@ let socketUrl;
 if (process.env.NODE_ENV === "production") {
 
     if (window.location.search.includes("office")) {
-        socketUrl = "http://192.168.29.122:9000";
+        socketUrl = "http://192.168.29.80:9000";
     }
     else {
         socketUrl = "https://vb-backend-g617.onrender.com";
