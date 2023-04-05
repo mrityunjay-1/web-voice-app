@@ -14,11 +14,11 @@ if (process.env.NODE_ENV === "production") {
         socketUrl = "http://192.168.29.80:9000";
     }
     else {
-        socketUrl = "https://70e6-2405-201-403b-99f8-e876-a1d0-e13b-dd5f.in.ngrok.io/";
+        socketUrl = "http://115.245.193.254";
     }
 
 } else {
-    socketUrl = "http://localhost:9000";
+    socketUrl = "http://115.245.193.254";
 }
 
 const socket = socketIOClient(socketUrl);
