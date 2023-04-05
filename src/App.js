@@ -11,14 +11,14 @@ let socketUrl;
 if (process.env.NODE_ENV === "production") {
 
     if (window.location.search.includes("office")) {
-        socketUrl = "https://115.245.193.254";
+        socketUrl = "http://115.245.193.254";
     }
     else {
-        socketUrl = "https://115.245.193.254";
+        socketUrl = "http://115.245.193.254";
     }
 
 } else {
-    socketUrl = "https://115.245.193.254";
+    socketUrl = "http://115.245.193.254";
 }
 
 const socket = socketIOClient(socketUrl);
@@ -349,7 +349,7 @@ const App = () => {
 
                                     socket.emit("join_room", { roomName, name, phone, email });
 
-                                    let audioRef = new Audio("http://localhost:9000/airlines_new_airlines_greeting_msg_tts.mp3");
+                                    let audioRef = new Audio("http://115.245.193.254/airlines_new_airlines_greeting_msg_tts.mp3");
 
                                     if (audioRef) {
                                         audioRef.play();
