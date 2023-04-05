@@ -11,14 +11,14 @@ let socketUrl;
 if (process.env.NODE_ENV === "production") {
 
     if (window.location.search.includes("office")) {
-        socketUrl = "http://192.168.29.80:9000";
+        socketUrl = "https://115.245.193.254";
     }
     else {
-        socketUrl = "http://115.245.193.254";
+        socketUrl = "https://115.245.193.254";
     }
 
 } else {
-    socketUrl = "http://115.245.193.254";
+    socketUrl = "https://115.245.193.254";
 }
 
 const socket = socketIOClient(socketUrl);
