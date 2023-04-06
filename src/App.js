@@ -25,9 +25,9 @@ const App = () => {
     const dotterRef = useRef();
 
     // user form to be filled before making web call
-    const [name, setName] = useState("Mrityunjay");
-    const [phone, setPhone] = useState("9090909090");
-    const [email, setEmail] = useState("abcd@example.com");
+    const [name, setName] = useState("");
+    const [phone, setPhone] = useState("");
+    const [email, setEmail] = useState("");
 
     const botAudioRef = useRef(null);
 
@@ -135,9 +135,9 @@ const App = () => {
             }
         }
 
-        socket.emit("join_room", { roomName, name, phone, email });
+        socket.emit("join_room", { roomName, name, phone, email, startDateTime: new Date().getTime() });
 
-        playBotAudio("http://115.245.193.254/airlines_new_airlines_greeting_msg_tts.mp3");
+        playBotAudio(`${process.env.REACT_APP_SERVER_URL}/airlines_new_airlines_greeting_msg_tts.mp3`);
 
         set_room_joined(true);
 
