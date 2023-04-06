@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
+import "./css/app.css";
 import Recorder from "recorder-js";
 
 import micIcon from "./assets/images/mic.gif";
@@ -7,41 +8,28 @@ import micInitial from "./assets/images/mic-initial.png";
 import socketIOClient from "socket.io-client";
 // import speak from "./helpers/speechSynthesis";
 
-let socketUrl;
-if (process.env.NODE_ENV === "production") {
-
-    if (window.location.search.includes("office")) {
-        socketUrl = "http://localhost:9000";
-    }
-    else {
-        socketUrl = "http://localhost:9000";
-    }
-
-} else {
-    socketUrl = "http://localhost:9000";
-}
-
-const socket = socketIOClient(socketUrl);
+const socket = socketIOClient(process.env.REACT_APP_SERVER_URL);
 
 const App = () => {
 
     const [audContext, setAudContext] = useState();
     const [room_joined, set_room_joined] = useState(false); // eslint-disable-next-line
     const [roomName, _setRoomName] = useState(new Date().getTime() + ""); // eslint-disable-next-line
-    // const aud = useRef(null); // eslint-disable-next-line
     const rec = useRef(null);
 
-    const [imgSrc, setImgSrc] = useState(true);
+    const [imgSrc, setImgSrc] = useState(false);
 
     const [userSocketId, setUserSocketId] = useState(socket.id);
 
     const timeoutRef = useRef();
     const dotterRef = useRef();
 
-    // user form to start web call
-    const [name, setName] = useState();
-    const [phone, setPhone] = useState();
-    const [email, setEmail] = useState();
+    // user form to be filled before making web call
+    const [name, setName] = useState("Mrityunjay");
+    const [phone, setPhone] = useState("9090909090");
+    const [email, setEmail] = useState("abcd@example.com");
+
+    const botAudioRef = useRef(null);
 
     const blobToArrayBuffer = (blob) => new Promise((resolve, reject) => {
         const fr = new FileReader();
@@ -51,13 +39,11 @@ const App = () => {
         }
     });
 
-    // let ct;
-
-    const startr = (stop = false) => {
+    const startRecording = (stop = false) => {
 
         if (stop) {
             clearTimeout(timeoutRef.current);
-            stopr(true);
+            stopRecording(true);
             return;
         }
 
@@ -67,13 +53,13 @@ const App = () => {
         rec.current.start();
 
         timeoutRef.current = setTimeout(() => {
-            stopr(stop);
+            stopRecording(stop);
         }, 1000);
     }
 
-    const stopr = (reallyStop = false) => {
+    const stopRecording = (reallyStop = false) => {
 
-        // console.log("Stopr fn called...");
+        // console.log("StopRecording fn called...");
 
         rec.current.stop().then(async ({ blob, buffer }) => {
 
@@ -90,7 +76,7 @@ const App = () => {
                 socket.emit("disconnect_call", { roomName });
                 clearTimeout(timeoutRef.current);
             } else {
-                startr();
+                startRecording();
             }
 
             console.log("pcm Data : ", pcmData);
@@ -102,6 +88,71 @@ const App = () => {
 
         });
 
+    }
+
+    const playBotAudio = (url) => {
+
+        if (botAudioRef.current) {
+            botAudioRef.current.pause();
+        }
+
+        if (!url) {
+            alert("Please provide url in order to speak!");
+            return;
+        }
+
+        let botAudio = new Audio(url);
+        botAudio.play();
+
+        botAudio.onended = () => {
+            startRecording();
+            setImgSrc(true);
+        }
+
+        botAudioRef.current = botAudio;
+    }
+
+    const startCall = () => {
+
+        // validating for non empty data 
+        if (!(name && phone && email)) {
+            alert("Please fill all the details to start the call...");
+            return null;
+        } else {
+
+            // Phone number validation
+            let phone_no = phone.toString();
+
+            if ((phone_no && phone_no.length !== 10) || !(phone_no.startsWith("6") || phone_no.startsWith("7") || phone_no.startsWith("8") || phone_no.startsWith("9"))) {
+                alert("Please enter a valid phone number!");
+                return null;
+            }
+
+            // Email number validation
+            if (!(/^\w+([.-]?\w+)*@\w+([.-]?\w+)*(.\w{2,3})+$/.test(email))) {
+                alert("Please enter a valid email!");
+                return null;
+            }
+        }
+
+        socket.emit("join_room", { roomName, name, phone, email });
+
+        playBotAudio("http://115.245.193.254/airlines_new_airlines_greeting_msg_tts.mp3");
+
+        set_room_joined(true);
+
+    }
+
+    const cutCall = () => {
+
+        if (botAudioRef.current) {
+            botAudioRef.current.pause();
+        }
+
+        startRecording(true);
+        set_room_joined(false);
+        clearInterval(dotterRef.current);
+        setImgSrc(false);
     }
 
     useEffect(() => {
@@ -141,96 +192,27 @@ const App = () => {
         });
 
         socket.on("vb-response", (data) => {
-            // console.log("Yay! Data: ", data);
+            console.log("Yay! Data: ", data);
             // speak({ text: data.response, volume: data.volume, rate: data.rate, pitch: data.pitch, lang: data.lang });
 
-            let audioRef = new Audio(data.audio_file_url);
-            audioRef.play();
+            playBotAudio(data.audio_file_url);
 
-            startr(true);
+            // startRecording(true);
 
             setImgSrc(false);
-
-            audioRef.onended = () => {
-                console.log("khatam ho gayi audio file ki play time...");
-                startr();
-                setImgSrc(true);
-            }
-
-            // disabling 
 
         });
         // eslint-disable-next-line
     }, []); // eslint-disable-next-line
 
     useEffect(() => {
-        // function getVoices() {
-        //     let voices = speechSynthesis.getVoices();
-        //     if (!voices.length) {
-        //         // some time the voice will not be initialized so we can call spaek with empty string
-        //         // this will initialize the voices 
-        //         let utterance = new SpeechSynthesisUtterance("");
-        //         speechSynthesis.speak(utterance);
-        //         voices = speechSynthesis.getVoices();
-        //     }
-        //     return voices;
-        // }
-
-        // function speak(text, voice, rate, pitch, volume) {
-        //     // create a SpeechSynthesisUtterance to configure the how text to be spoken 
-        //     let speakData = new SpeechSynthesisUtterance();
-        //     speakData.volume = volume; // From 0 to 1
-        //     speakData.rate = rate; // From 0.1 to 10
-        //     speakData.pitch = pitch; // From 0 to 2
-        //     speakData.text = text;
-        //     speakData.lang = 'en';
-        //     speakData.voice = voice;
-
-        //     // pass the SpeechSynthesisUtterance to speechSynthesis.speak to start speaking 
-        //     speechSynthesis.speak(speakData);
-        //     // speechSynthesis.p
-
-        // }
-
-        // if ('speechSynthesis' in window) {
-
-        //     let voices = getVoices();
-        //     let rate = 1, pitch = 1, volume = 1;
-        //     let text = "Spaecking with volume = 1 rate =1 pitch =2 ";
-
-        //     // speak(text, voices[5], rate, pitch, volume);
-
-        //     setTimeout(() => { // speak after 2 seconds 
-        //         rate = 0.8; pitch = 1.5; volume = 0.5;
-        //         text = "website, also called Web site, collection of files and related resources accessible through the World Wide Web and organized under a particular domain name. Typical files found at a website are HTML documents with their associated graphic image files (GIF, JPEG, etc.), scripted programs (in Perl, PHP, Java, etc.), and similar resources. The site's files.";
-        //         speak(text, voices[5], rate, pitch, volume);
-        //     }, 200);
-
-        // } else {
-        //     console.log(' Speech Synthesis Not Supported 😞');
-        // }
-
-        // let int16Array = new Int16Array(arr);
-
-        // console.log("arr buffer : ", int16Array);
-
-        // let arrBlob = new Blob([int16Array], { type: "audio/wav" });
-
-        // console.log("arr blob = ", arrBlob);
-
-        // aud.current.src = URL.createObjectURL(arrBlob);
-        // aud.current.play();
 
         const dotter = document.getElementById("dotter");
-
-        // console.log("Dotter : ", dotter);
 
         if (dotter) {
             let initialText = dotter.textContent;
             let i = 0;
             dotterRef.current = setInterval(() => {
-
-                // console.log("i = ", i);
 
                 if (i === 3) {
                     dotter.textContent = initialText;
@@ -242,7 +224,6 @@ const App = () => {
                     i = i + 1;
                 }
 
-
             }, 1000);
         }
 
@@ -250,20 +231,10 @@ const App = () => {
 
     return (
         <>
-
-            {/* <audio ref={aud} id="audio" controls /> */}
-
             {
                 room_joined ?
 
                     <>
-                        {/* <button onClick={() => {
-                            // socket.emit("start_call", { roomName });
-                            startr();
-                        }}>
-                            Start Record
-                        </button> */}
-
                         <div style={{ width: "100vw", height: "100vh", backgroundColor: "lightgreen", display: "grid", placeItems: "center" }}>
 
                             {
@@ -295,23 +266,12 @@ const App = () => {
 
                                     </>
                                     :
-                                    null
+                                    <p>uh-oh! Looks like this app is not able to communicate with the backend server.</p>
                             }
 
-                            <button
-                                style={{ cursor: "pointer", fontSize: "2rem", padding: "1rem 4rem", backgroundColor: "indigo", color: "white", border: "0.1rem solid black", borderRadius: "1rem" }}
-                                onClick={() => {
-                                    startr(true);
-                                    set_room_joined(false);
-                                    clearInterval(dotterRef.current)
-                                }}
-                            >
-                                Cut this call &nbsp; ❌
-                            </button>
+                            <button className="cut-call-button" onClick={cutCall}> Cut this call &nbsp; ❌ </button>
 
                         </div>
-
-                        {/* <audio ref={aud} id="audio" controls /> */}
                     </>
 
                     :
@@ -338,33 +298,7 @@ const App = () => {
                             <br />
                             <br />
 
-                            <button
-                                style={{ width: "100%", fontSize: "2rem", padding: "1rem 4rem", backgroundColor: "indigo", color: "white", border: "0.1rem solid black", borderRadius: "1rem" }}
-                                onClick={() => {
-
-                                    if (!(name && phone && email)) {
-                                        alert("Please fill all the details to start the call...");
-                                        return null;
-                                    }
-
-                                    socket.emit("join_room", { roomName, name, phone, email });
-
-                                    let audioRef = new Audio("http://localhost:9000/airlines_new_airlines_greeting_msg_tts.mp3");
-
-                                    if (audioRef) {
-                                        audioRef.play();
-                                    }
-
-                                    set_room_joined(true);
-
-                                    audioRef.onended = () => {
-                                        startr();
-                                    }
-
-                                }}
-                            >
-                                📞  &nbsp; Call To IVR
-                            </button>
+                            <button className="start-call-button" onClick={startCall} > 📞  &nbsp; Call To IVR </button>
 
                         </div>
                     </div>
