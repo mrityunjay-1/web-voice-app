@@ -25,9 +25,9 @@ const App = () => {
     const dotterRef = useRef();
 
     // user form to be filled before making web call
-    const [name, setName] = useState("");
-    const [phone, setPhone] = useState("");
-    const [email, setEmail] = useState("");
+    const [name, setName] = useState(["Mayank Sinha"]);
+    const [phone, setPhone] = useState("9809890989");
+    const [email, setEmail] = useState("sample@email.com");
 
     const botAudioRef = useRef(null);
 
