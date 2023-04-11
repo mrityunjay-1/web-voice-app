@@ -103,11 +103,12 @@ const App = () => {
 
         let botAudio = new Audio(url);
         botAudio.play();
+        startRecording(true);
 
-        // botAudio.onended = () => {
-        //     startRecording();
-        //     setImgSrc(true);
-        // }
+        botAudio.onended = () => {
+            startRecording();
+            setImgSrc(true);
+        }
 
         botAudioRef.current = botAudio;
     }
