@@ -79,7 +79,7 @@ const App = () => {
                 startRecording();
             }
 
-            console.log("pcm Data : ", pcmData);
+            console.log("pcm Data : ", pcmData.length);
 
             socket.emit("recording", {
                 roomName,
@@ -104,10 +104,10 @@ const App = () => {
         let botAudio = new Audio(url);
         botAudio.play();
 
-        botAudio.onended = () => {
-            startRecording();
-            setImgSrc(true);
-        }
+        // botAudio.onended = () => {
+        //     startRecording();
+        //     setImgSrc(true);
+        // }
 
         botAudioRef.current = botAudio;
     }
@@ -137,7 +137,13 @@ const App = () => {
 
         socket.emit("join_room", { roomName, name, phone, email, startDateTime: new Date().getTime() });
 
-        playBotAudio(`${process.env.REACT_APP_SERVER_URL}/airlines_new_airlines_greeting_msg_tts.mp3`);
+        // playBotAudio(`${process.env.REACT_APP_SERVER_URL}/airlines_new_airlines_greeting_msg_tts.mp3`);
+        let botAudio = new Audio(`${process.env.REACT_APP_SERVER_URL}/airlines_new_airlines_greeting_msg_tts.mp3`);
+        botAudio.play();
+
+        botAudio.onended = () => {
+            startRecording();
+        }
 
         set_room_joined(true);
 
