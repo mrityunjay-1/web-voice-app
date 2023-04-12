@@ -25,9 +25,9 @@ const App = () => {
     const dotterRef = useRef();
 
     // user form to be filled before making web call
-    const [name, setName] = useState("");
-    const [phone, setPhone] = useState("");
-    const [email, setEmail] = useState("");
+    const [name, setName] = useState(["Mayank Sinha"]);
+    const [phone, setPhone] = useState("9809890989");
+    const [email, setEmail] = useState("sample@email.com");
 
     const botAudioRef = useRef(null);
 
@@ -79,7 +79,7 @@ const App = () => {
                 startRecording();
             }
 
-            console.log("pcm Data : ", pcmData);
+            console.log("pcm Data : ", pcmData.length);
 
             socket.emit("recording", {
                 roomName,
@@ -103,6 +103,7 @@ const App = () => {
 
         let botAudio = new Audio(url);
         botAudio.play();
+        startRecording(true);
 
         botAudio.onended = () => {
             startRecording();
@@ -137,7 +138,13 @@ const App = () => {
 
         socket.emit("join_room", { roomName, name, phone, email, startDateTime: new Date().getTime() });
 
-        playBotAudio(`${process.env.REACT_APP_SERVER_URL}/airlines_new_airlines_greeting_msg_tts.mp3`);
+        // playBotAudio(`${process.env.REACT_APP_SERVER_URL}/airlines_new_airlines_greeting_msg_tts.mp3`);
+        let botAudio = new Audio(`${process.env.REACT_APP_SERVER_URL}/airlines_new_airlines_greeting_msg_tts.mp3`);
+        botAudio.play();
+
+        botAudio.onended = () => {
+            startRecording();
+        }
 
         set_room_joined(true);
 
