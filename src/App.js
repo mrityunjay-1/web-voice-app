@@ -5,6 +5,8 @@ import Recorder from "recorder-js";
 import micIcon from "./assets/images/mic.gif";
 import micInitial from "./assets/images/mic-initial.png";
 
+import Logo from "./assets/images/logo.png";
+
 import socketIOClient from "socket.io-client";
 // import speak from "./helpers/speechSynthesis";
 
@@ -144,6 +146,7 @@ const App = () => {
 
         botAudio.onended = () => {
             startRecording();
+            setImgSrc(true);
         }
 
         set_room_joined(true);
@@ -242,7 +245,7 @@ const App = () => {
                 room_joined ?
 
                     <>
-                        <div style={{ width: "100vw", height: "100vh", backgroundColor: "lightgreen", display: "grid", placeItems: "center" }}>
+                        <div style={{ width: "100vw", height: "100vh", background: "linear-gradient(to right bottom, lightgreen, purple)", display: "grid", placeItems: "center" }}>
 
                             {
                                 userSocketId ?
@@ -276,16 +279,23 @@ const App = () => {
                                     <p>uh-oh! Looks like this app is not able to communicate with the backend server.</p>
                             }
 
-                            <button className="cut-call-button" onClick={cutCall}> Cut this call &nbsp; ❌ </button>
+                            <button className="cut-call-button" onClick={cutCall}> Disconnect &nbsp; ❌ </button>
 
                         </div>
                     </>
 
                     :
 
-                    <div style={{ width: "100vw", height: "100vh", backgroundColor: "cyan", display: "grid", placeItems: "center" }}>
+                    <div style={{ width: "100vw", height: "100vh", backgroundColor: "#85BB65", display: "grid", placeItems: "center" }}>
 
                         <div className="form-container">
+
+                            <div style={{ display: "grid", placeItems: "center" }}>
+                                <img src={Logo} style={{ width: "70%", filter: "drop-shadow(0.1rem 0.5rem 0.3rem #233142)" }} />
+                            </div>
+
+                            <br />
+                            <br />
 
                             <div className="form-container-div">
                                 <p className="form-p-tag">Name</p>
@@ -305,7 +315,7 @@ const App = () => {
                             <br />
                             <br />
 
-                            <button className="start-call-button" onClick={startCall} > 📞  &nbsp; Call To IVR </button>
+                            <button className="start-call-button" onClick={startCall} > 📞  &nbsp; Call  </button>
 
                         </div>
                     </div>
