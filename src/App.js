@@ -291,7 +291,7 @@ const App = () => {
                         <div className="form-container">
 
                             <div style={{ display: "grid", placeItems: "center" }}>
-                                <img src={Logo} style={{ width: "70%", filter: "drop-shadow(0.1rem 0.5rem 0.3rem #233142)" }} />
+                                <img alt="logo" src={Logo} style={{ width: "70%", filter: "drop-shadow(0.1rem 0.5rem 0.3rem #233142)" }} />
                             </div>
 
                             <br />
