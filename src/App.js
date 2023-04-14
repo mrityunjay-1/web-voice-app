@@ -27,9 +27,9 @@ const App = () => {
     const dotterRef = useRef();
 
     // user form to be filled before making web call
-    const [name, setName] = useState(["Mayank Sinha"]);
-    const [phone, setPhone] = useState("9809890989");
-    const [email, setEmail] = useState("sample@email.com");
+    const [name, setName] = useState("");
+    const [phone, setPhone] = useState("");
+    const [email, setEmail] = useState("");
 
     const botAudioRef = useRef(null);
 
@@ -75,7 +75,7 @@ const App = () => {
 
             if (reallyStop) {
                 // disconnect user so that they can not send any data to backend
-                socket.emit("disconnect_call", { roomName });
+                socket.emit("disconnect_call", { socketId: userSocketId });
                 clearTimeout(timeoutRef.current);
             } else {
                 startRecording();
@@ -138,7 +138,7 @@ const App = () => {
             }
         }
 
-        socket.emit("join_room", { roomName, name, phone, email, startDateTime: new Date().getTime() });
+        socket.emit("join_room", { roomName, name, phone, email, userType: "user", startDateTime: new Date().getTime() });
 
         // playBotAudio(`${process.env.REACT_APP_SERVER_URL}/airlines_new_airlines_greeting_msg_tts.mp3`);
         let botAudio = new Audio(`${process.env.REACT_APP_SERVER_URL}/airlines_new_airlines_greeting_msg_tts.mp3`);
@@ -247,6 +247,12 @@ const App = () => {
                     <>
                         <div style={{ width: "100vw", height: "100vh", background: "linear-gradient(to right bottom, lightgreen, purple)", display: "grid", placeItems: "center" }}>
 
+                            <div style={{ width: "100%", display: "flex", justifyContent: "center", flexDirection: "column", alignItems: "center" }}>
+                                <h1 style={{ fontSize: "3rem" }}>Hello, {name}</h1>
+                                <p style={{ fontSize: "1.5rem" }}>Email: {email}</p>
+                                <p style={{ fontSize: "1.5rem" }}>Phone: {phone}</p>
+                            </div>
+
                             {
                                 userSocketId ?
                                     <>
@@ -255,7 +261,7 @@ const App = () => {
                                             imgSrc
                                                 ?
                                                 <>
-                                                    <p>Your socket id is : {userSocketId}</p>
+                                                    {/* <p>Your socket id is : {userSocketId}</p> */}
 
                                                     <div style={{ width: "40%", display: "flex", justifyContent: "center", flexDirection: "column", alignItems: "center" }}>
                                                         <img src={micIcon} style={{ width: "50%" }} alt="mic-icon" />
@@ -304,7 +310,7 @@ const App = () => {
 
                             <div className="form-container-div">
                                 <p className="form-p-tag">Phone No</p>
-                                <input value={phone} onChange={(e) => setPhone(e.target.value)} type="number" id="name" placeholder="Your Phone No. Ex: 12345667890" required />
+                                <input value={phone} onChange={(e) => setPhone(e.target.value)} type="text" id="name" placeholder="Your Phone No. Ex: 12345667890" required />
                             </div>
 
                             <div className="form-container-div">
