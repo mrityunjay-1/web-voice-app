@@ -19,7 +19,7 @@ const App = () => {
     const [roomName, _setRoomName] = useState(new Date().getTime() + ""); // eslint-disable-next-line
     const rec = useRef(null);
 
-    const [imgSrc, setImgSrc] = useState(true);
+    const [imgSrc, setImgSrc] = useState(false);
 
     const [userSocketId, setUserSocketId] = useState(socket.id);
 
