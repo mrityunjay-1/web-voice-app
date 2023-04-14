@@ -75,7 +75,6 @@ const App = () => {
 
             if (reallyStop) {
                 // disconnect user so that they can not send any data to backend
-                socket.emit("disconnect_call", { socketId: userSocketId });
                 clearTimeout(timeoutRef.current);
             } else {
                 startRecording();
@@ -163,6 +162,7 @@ const App = () => {
         set_room_joined(false);
         clearInterval(dotterRef.current);
         setImgSrc(false);
+        socket.emit("disconnect_call", { socketId: userSocketId });
     }
 
     useEffect(() => {
