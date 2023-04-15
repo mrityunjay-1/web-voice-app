@@ -162,7 +162,8 @@ const App = () => {
         set_room_joined(false);
         clearInterval(dotterRef.current);
         setImgSrc(false);
-        socket.emit("disconnect_call", { socketId: userSocketId });
+        // socket.emit("disconnect_call", { socketId: userSocketId });
+        window.location.reload();
     }
 
     useEffect(() => {
