@@ -31,6 +31,12 @@ const App = () => {
     const [phone, setPhone] = useState("");
     const [email, setEmail] = useState("");
 
+    // Hold Line
+    const [holdLine, setHoldLine] = useState();
+    const holdLineIntervalRef = useRef(null);
+
+    const simpleAudioPlayRef = useRef(null);
+
     const botAudioRef = useRef(null);
 
     const blobToArrayBuffer = (blob) => new Promise((resolve, reject) => {
@@ -203,6 +209,31 @@ const App = () => {
         });
 
         socket.on("vb-response", (data) => {
+
+            // Whenever i receive the hold_line key as true then playing an audio on repeat for every 10 seconds
+            if (data.hold_line) {
+
+                setHoldLine(true);
+
+                // initiating the audio
+                let holdLineAudio = new Audio(data.audio_file_url);
+                simpleAudioPlayRef.current = holdLineAudio; // storing audio ref in simpleAudioPlayRef variable
+                holdLineAudio.play();
+
+                // setting Interval for playing the audio in every 10 sec
+                holdLineIntervalRef.current = setInterval(() => {
+                    if (holdLine) holdLineAudio.play();
+                }, 10000);
+            }
+
+            // Similarly when a call is on hold and i received that hold_line key as false then stop playing that repeat audio
+            // and back to normal behavior
+            if (holdLine && data.hold_line === false) {
+                clearInterval(holdLineIntervalRef.current);
+                setHoldLine(false);
+                simpleAudioPlayRef?.current?.pause();
+            }
+
             console.log("Yay! Data: ", data);
             // speak({ text: data.response, volume: data.volume, rate: data.rate, pitch: data.pitch, lang: data.lang });
 
@@ -284,6 +315,13 @@ const App = () => {
                                     </>
                                     :
                                     <p>uh-oh! Looks like this app is not able to communicate with the backend server.</p>
+                            }
+
+                            {
+                                holdLine ?
+                                    <p style={{ color: "white" }}>Call is currently on hold.</p>
+                                    :
+                                    null
                             }
 
                             <button className="cut-call-button" onClick={cutCall}> Disconnect &nbsp; ❌ </button>
